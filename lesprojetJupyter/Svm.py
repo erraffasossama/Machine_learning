@@ -1,0 +1,199 @@
+import numpy as np
+
+class SVM:
+    
+    
+    def __init__(self, lr=0.001, lambda_param=0.01, n_iters=1000):
+       
+        self.lr = lr                    # Taux d'apprentissage
+        self.lambda_param = lambda_param  # Paramètre de régularisation
+        self.n_iters = n_iters          # Nombre d'itérations
+        self.w = None                   # Poids (coefficients) du modèle
+        self.b = None                   # Biais (intercept) du modèle
+        
+    def fit(self, X, y):
+        
+        n_samples, n_features = X.shape  # Nombre d'échantillons et de caractéristiques
+        
+        # Convertit les étiquettes y en -1 et 1 (SVM utilise -1/1 au lieu de 0/1)
+        # Si y <= 0 -> -1, sinon -> 1
+        y_ = np.where(y <= 0, -1, 1)
+        
+        # Initialisation des paramètres à zéro
+        self.w = np.zeros(n_features)    # Vecteur de poids initialisé à 0
+        self.b = 0                       # Biais initialisé à 0
+        
+        # Descente de gradient -
+        for _ in range(self.n_iters):   
+            # Parcourt chaque échantillon (descente de gradient stochastique)
+            for idx, x_i in enumerate(X):
+                
+                # Vérifie la condition de marge: y_i * (w·x_i - b) >= 1
+                # Si condition vraie : l'échantillon est bien classé et hors marge
+                condition = y_[idx] * (np.dot(x_i, self.w) - self.b) >= 1
+                
+                if condition:
+                    # CAS 1: Échantillon respecte la marge
+                    # Mise à jour uniquement de la régularisation (pas de perte)
+                    # Gradient: 2 * λ * w
+
+                    self.w -= self.lr * (2 * self.lambda_param * self.w)
+
+                else:
+                    # CAS 2: Échantillon ne respecte pas la marge
+                    # (mal classé OU à l'intérieur de la marge)
+                    # Mise à jour complète avec la perte hinge
+                    # Gradient pour w: 2 * λ * w - y_i * x_i
+ 
+
+                    self.w -= self.lr * (2 * self.lambda_param * self.w - np.dot(x_i, y_[idx]))
+
+                    # Mise à jour du biais avec gradient: -y_i
+                    self.b -= self.lr * y_[idx]
+    
+    def predict(self, X):
+        
+      
+        # Calcule la fonction de décision: w·X - b
+        approx = np.dot(X, self.w) - self.b
+        
+        # Retourne le signe: 1 si positif, -1 si négatif, 0 si nul
+        return np.sign(approx)
+
+
+
+
+# Création des données d'entraînement
+# X : matrice 
+
+X = np.array([[1, 2],   # Point 0 
+              [2, 3],   # Point 1
+              [3, 4],   # 
+              [8, 9],   # 
+              [9, 10]]) # 
+
+# y : étiquettes correspondantes (0 ou 1)
+y = np.array([0, 0, 0, 1, 1])  
+
+# Création d'une instance du modèle SVM
+# lr=0.01 : taux d'apprentissage
+# lambda_param=0.01 : régularisation
+# n_iters=1000 : nombre d'itérations
+svm = SVM(lr=0.01, lambda_param=0.01, n_iters=1000)
+
+# Entraînement du modèle par PEL DE LAFONCTION FIT
+svm.fit(X, y)
+
+# Prédiction pour un nouveau point [2.5, 3.5]
+prediction = svm.predict([[2.5, 3.5]])
+
+# Affichage du résultat
+print(f"Prédiction pour le point [2.5, 3.5]: {prediction[0]}")
+
+# Affichage des paramètres appris
+print(f"Poids (w): {svm.w}")
+
+# Test sur tous les points d'entraînement
+print("\nPrédictions sur les données d'entraînement:")
+for i, point in enumerate(X):
+    pred = svm.predict([point])[0]
+    print(f"Point {point} -> Prédit: {pred}, Réel: {1 if y[i]==1 else -1}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import numpy as np
+
+class SVM:
+    def __init__(self, learning_rate=0.01, lambda_param=0.01, n_iters=1000):
+        self.lr = learning_rate
+        self.lambda_param = lambda_param
+        self.n_iters = n_iters
+        self.w = None
+        self.b = None
+
+    def fit(self, X, y):
+        y_ = np.where(y <= 0, -1, 1)  # -1/1 pour SVM
+        n_samples, n_features = X.shape
+        self.w = np.zeros(n_features)
+        self.b = 0
+
+        for _ in range(self.n_iters):
+            for idx, x_i in enumerate(X):
+                condition = y_[idx] * (np.dot(x_i, self.w) - self.b) >= 1
+                if condition:
+                    self.w -= self.lr * (2 * self.lambda_param * self.w)
+                else:
+                    self.w -= self.lr * (2 * self.lambda_param * self.w - np.dot(x_i, y_[idx]))
+                    self.b -= self.lr * y_[idx]
+
+    def predict(self, X):
+        return np.sign(np.dot(X, self.w) - self.b)
+
+# Exemple
+X = np.array([[3,4], [1,4], [2,3], [6,-1], [7,-1], [5,0]])
+y = np.array([1, 1, 1, -1, -1, -1])
+svm = SVM()
+svm.fit(X, y)
+print(svm.predict([[3,3], [5,-1]]))  # [1 -1]
+
+
+
+
+
+
+import numpy as np
+
+class SVM:
+    def __init__(self, learning_rate=0.01, lambda_param=0.01, n_iters=1000):
+        self.lr = learning_rate
+        self.lambda_param = lambda_param
+        self.n_iters = n_iters
+        self.w = None
+        self.b = None
+
+    def fit(self, X, y):
+        n_samples, n_features = X.shape
+        y_ = np.where(y <= 0, -1, 1)  # Convertir en -1/1
+        self.w = np.zeros(n_features)
+        self.b = 0
+
+        for _ in range(self.n_iters):
+            for idx, x_i in enumerate(X):
+                condition = y_[idx] * (np.dot(x_i, self.w) - self.b) >= 1
+                if condition:
+                    self.w -= self.lr * (2 * self.lambda_param * self.w)
+                else:
+                    self.w -= self.lr * (2 * self.lambda_param * self.w - np.dot(x_i, y_[idx]))
+                    self.b -= self.lr * y_[idx]
+
+    def predict(self, X):
+        linear_output = np.dot(X, self.w) - self.b
+        return np.sign(linear_output)
+
+# Exemple
+X = np.array([[3,4], [1,4], [2,3], [6,-1], [7,-1], [5,0]])
+y = np.array([1, 1, 1, -1, -1, -1])
+svm = SVM()
+svm.fit(X, y)
+print(svm.predict([[2,2], [5,5]]))  # [1 -1]
+
+
+
+
+
+print(f"kkkkkkk:{nam:.4f
+                 }")
